@@ -23,6 +23,15 @@ class SendImageResponse(BaseResponse):
         self.create_image_response: Optional[CreateImageResponseBody] = None
         self.create_message_response: Optional[CreateMessageResponseBody] = None
 
+# 异常处理
+def handle_api_response(response: BaseResponse) -> BaseResponse:
+    if not response.success():
+        lark.logger.error(
+            f"API call failed, "
+            f"code: {response.code}, "
+            f"msg: {response.msg}, "
+            f"log_id: {response.get_log_id()}")
+    return response
 
 # 发送图片消息
 def send_image(client: lark.Client, request: SendImageRequest) -> BaseResponse:
@@ -37,11 +46,6 @@ def send_image(client: lark.Client, request: SendImageRequest) -> BaseResponse:
     create_image_resp = client.im.v1.image.create(create_image_req)
 
     if not create_image_resp.success():
-        lark.logger.error(
-            f"client.im.v1.image.create failed, "
-            f"code: {create_image_resp.code}, "
-            f"msg: {create_image_resp.msg}, "
-            f"log_id: {create_image_resp.get_log_id()}")
         return create_image_resp
 
     # 发送消息
@@ -59,11 +63,6 @@ def send_image(client: lark.Client, request: SendImageRequest) -> BaseResponse:
     create_message_resp: CreateMessageResponse = client.im.v1.message.create(create_message_req, option)
 
     if not create_message_resp.success():
-        lark.logger.error(
-            f"client.im.v1.message.create failed, "
-            f"code: {create_message_resp.code}, "
-            f"msg: {create_message_resp.msg}, "
-            f"log_id: {create_message_resp.get_log_id()}")
         return create_message_resp
 
     # 返回结果
